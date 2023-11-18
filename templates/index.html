@@ -37,12 +37,9 @@
             border-radius: 5px;
         }
 
-        input[type="submit"] {
-            display: none;
-        }
-
-        label:hover {
-            background-color: #45a049;
+        input[type="file"] + label {
+            background-color: #4CAF50;
+            cursor: pointer;
         }
 
         .progress-container {
@@ -64,20 +61,22 @@
 <body>
     <h1>File Upload to S3</h1>
     <form method="POST" action="/upload" enctype="multipart/form-data">
-        <label for="file">Choose File</label>
-        <input type="file" name="file" id="file" accept="image/*">
-        <input type="submit" value="Upload">
+        <input type="file" name="file" id="file" style="display: none;">
+        <label for="file" id="file-label">Choose File</label>
+        <div class="progress-container" style="display: none;">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <input type="submit" value="Upload" style="display: none;">
     </form>
-    <div class="progress-container">
-        <div class="progress-bar" id="progressBar"></div>
-    </div>
     <script>
         document.querySelector('form').addEventListener('submit', function(event) {
             event.preventDefault();
-            
+
             const fileInput = document.getElementById('file');
+            const fileLabel = document.getElementById('file-label');
             const progressBar = document.getElementById('progressBar');
             const file = fileInput.files[0];
+
             if (!file) {
                 alert('No file selected');
                 return;
@@ -99,6 +98,8 @@
                 }
             })
             .catch(error => {
+                console.error("An error occurred:", error);
+                console.log(error);
                 alert('Error uploading file.');
             });
 
@@ -109,6 +110,16 @@
                     progressBar.style.width = (parseInt(progressBar.style.width) + 10) + '%';
                 }
             }, 500);
+        });
+        
+        // Show the file input and submit button when the label is clicked
+        const fileLabel = document.getElementById('file-label');
+        fileLabel.addEventListener('click', function() {
+            const fileInput = document.getElementById('file');
+            const submitButton = document.querySelector('input[type="submit"]');
+            fileInput.style.display = 'block';
+            submitButton.style.display = 'block';
+            this.style.display = 'none';
         });
     </script>
 </body>
