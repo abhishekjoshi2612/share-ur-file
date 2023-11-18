@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>File Upload to S3</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        form {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        label {
+            display: block;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            text-align: center;
+            border-radius: 5px;
+        }
+
+        input[type="file"] + label {
+            background-color: #4CAF50;
+            cursor: pointer;
+        }
+
+        .progress-container {
+            margin-top: 20px;
+            width: 100%;
+            background-color: #ccc;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            width: 0;
+            height: 20px;
+            background-color: #4CAF50;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <h1>File Upload to S3</h1>
+    <form method="POST" action="/upload" enctype="multipart/form-data">
+        <input type="file" name="file" id="file" style="display: none;">
+        <label for="file" id="file-label">Choose File</label>
+        <div class="progress-container" style="display: none;">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <input type="submit" value="Upload" style="display: none;">
+    </form>
+    <script>
+        document.querySelector('form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const fileInput = document.getElementById('file');
+            const fileLabel = document.getElementById('file-label');
+            const progressBar = document.getElementById('progressBar');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert('No file selected');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('File uploaded successfully!');
+                } else {
+                    alert('File upload failed.');
+                }
+            })
+            .catch(error => {
+                console.error("An error occurred:", error);
+                console.log(error);
+                alert('Error uploading file.');
+            });
+
+            const interval = setInterval(() => {
+                if (progressBar.style.width === '100%') {
+                    clearInterval(interval);
+                } else {
+                    progressBar.style.width = (parseInt(progressBar.style.width) + 10) + '%';
+                }
+            }, 500);
+        });
+        
+        // Show the file input and submit button when the label is clicked
+        const fileLabel = document.getElementById('file-label');
+        fileLabel.addEventListener('click', function() {
+            const fileInput = document.getElementById('file');
+            const submitButton = document.querySelector('input[type="submit"]');
+            fileInput.style.display = 'block';
+            submitButton.style.display = 'block';
+            this.style.display = 'none';
+        });
+    </script>
+</body>
+</html>
